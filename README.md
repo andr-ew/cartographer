@@ -1,5 +1,7 @@
 # warden
 
+simplify the division of softcut buffer space into arbitrary recording and/or playback regions
+
 ### types
 
 `region`: division, placed end-to-end in buffer space and will non cross another region.
