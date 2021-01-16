@@ -10,7 +10,9 @@
 
 ### methods
 
-`:make(type, n)`: initiates `n` of type `region` or `loop` within `warden` or another object created with make. `region`s are initiated with start & end points that evenly divide all regions across the parent object.
+`:make(type, n)`: initiates `n` of type `region` or `loop` within `warden` or another object created with make. 
+  - `region`s are initiated with start & end points that evenly divide all regions across the parent object.
+  - `loop`s are initiated with start & end points equal to the parent object
 
 `:s_start(x)`: set the start point in seconds. 0 corresponds to the starting point of the parent object.
 
