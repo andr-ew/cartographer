@@ -4,7 +4,7 @@ simplify the division of softcut buffer space into arbitrary recording and/or pl
 
 ### types
 
-`region`: division, placed end-to-end in buffer space and will non cross another region.
+`region`: division, placed end-to-end in buffer space and will not cross another region.
 
 `loop`: may occupy any area within a region, overlap other loops withing that region
 
