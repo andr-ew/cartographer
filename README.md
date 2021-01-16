@@ -13,7 +13,7 @@ simplify the division of softcut buffer space into arbitrary recording and/or pl
 ### methods
 
 `:make(type, n)`: initiates `n` of type `region` or `loop` within `warden` or another object created with make. 
-  - `region`s are initiated with start & end points that evenly divide all regions across the parent object.
+  - `region`s are initiated with start & end points that evenly divide all regions across the parent object. a call make automatically splits regions across buffers if needed.
   - `loop`s are initiated with start & end points equal to the parent object
 
 `:s_start(x)`: set the start point in seconds. 0 corresponds to the starting point of the parent object.
@@ -28,7 +28,7 @@ simplify the division of softcut buffer space into arbitrary recording and/or pl
 
 `:f_len(x)`: set the length a fraction of the parent object size. this value is clamped to the remaining space in the parent object.
 
-`:push(n)`: assign the start end & end points of the object to the nth softcut voice
+`:push(n)`: assign the start point, end point, & buffer of the object to the nth softcut voice
 
 ### example usage
 
