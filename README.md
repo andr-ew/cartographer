@@ -26,6 +26,8 @@
 
 `:push(n)`: assign the start end & end points of the object to the nth softcut voice
 
+### example usage
+
 ```
 warden:make(region, 8):make(region, 1):make(loop, 4) -- initiate regions & loops
 
