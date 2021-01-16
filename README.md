@@ -33,7 +33,8 @@
 ```
 warden:make(region, 8):make(region, 1):make(loop, 4) -- initiate nested regions regions & loops
 
--- alter start & end points reative to parent objects
+-- modify start & end points reative to parent objects
+
 warden.region[1]:start(2)
 warden.region[1]:end(3)
 
@@ -44,6 +45,7 @@ warden.region[1].region[1].loop[1]:f_start(0.3)
 warden.region[1].region[1].loop[1]:f_len(0.2)
 
 -- push bottom level loop to the first softcut voice
+
 warden.region[1].region[1].loop[1]:push(1)
 
 ```
