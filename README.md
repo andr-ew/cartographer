@@ -1,16 +1,43 @@
 # warden
 
+### types
+
+`region`: division, placed end-to-end in buffer space and will non cross another region.
+
+`loop`: may occupy any area within a region, overlap other loops withing that region
+
+`warden`: a special case of `region` that occupies the total softcut buffer space
+
+### methods
+
+`:make(type, n)`: initiates `n` of type `region` or `loop` within `warden` or another object created with make. `region`s are initiated with start & end points that evenly divide all regions across the parent object.
+
+`:s_start(x)`: set the start point in seconds. 0 corresponds to the starting point of the parent object.
+
+`:s_end(x)`: set the end point in seconds. this value is clamped to the length of the parent object.
+
+`:s_len(x)`: set the length in seconds. this value is clamped to the remaining space in the parent object.
+
+`:f_start(x)`: set start point as a fraction of the parent object size.
+
+`:f_end(x)`: set end point as a fraction of the parent object size.
+
+`:f_len(x)`: set the length a fraction of the parent object size. this value is clamped to the remaining space in the parent object.
+
+`:push(n)`: assign the start end & end points of the object to the nth softcut voice
+
 ```
+warden:make(region, 8):make(region, 1):make(loop, 4) -- initiate regions & loops
 
-warden.make(region, 8).make(region, 1).make(loop, 4)
+warden.region[1]:start(2)
+warden.region[1]:end(3)
 
-warden.region[1].start(2)
-warden.region[1].end(3)
+warden.region[1].region[1]:s_start(0)
+warden.region[1].region[1]:s_end(1)
 
-warden.region[1].region[1].start(0)
-warden.region[1].region[1].end(1)
+warden.region[1].region[1].loop[1]:f_start(0.3)
+warden.region[1].region[1].loop[1]:f_len(0.2)
 
-warden.region[1].region[1].loop[1].fstart(0.3)
-warden.region[1].region[1].loop[1].fend(0.7)
+warden.region[1].region[1].loop[1]:push(1)
 
 ```
