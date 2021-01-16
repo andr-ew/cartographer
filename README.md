@@ -1,6 +1,6 @@
 # warden
 
-simplify the division of softcut buffer space into arbitrary recording and/or playback regions
+simplify the division of softcut buffer space into arbitrary recording and/or playback regions & sub-regions
 
 ### types
 
