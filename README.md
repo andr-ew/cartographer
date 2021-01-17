@@ -2,6 +2,8 @@
 
 simplify the division of softcut buffer space into arbitrary recording and/or playback regions & sub-regions
 
+# rev1
+
 ### types
 
 `region`: division, placed end-to-end in buffer space and will not cross another region.
@@ -49,5 +51,18 @@ warden.region[1].region[1].loop[1]:f_len(0.2)
 -- push bottom level loop to the first softcut voice
 
 warden.region[1].region[1].loop[1]:push(1)
+
+```
+
+# rev2
+
+```
+blank_area = warden.divide(6)
+rec_area = warden.subloop(blank_area)
+play_area = warden.subloop(rec_area)
+
+```
+
+```
 
 ```
