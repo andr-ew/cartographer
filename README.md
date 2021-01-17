@@ -78,7 +78,7 @@ end
 ### rev2.1
 
 ```
-blank_area = warden.divide(buffer[1], 2)
+blank_area = warden.divide(warden.buffer[1], 2)
 rec_area = warden.subloop(blank_area)
 play_area = warden.subloop(rec_area)
 ```
