@@ -57,6 +57,7 @@ warden.region[1].region[1].loop[1]:push(1)
 # rev2
 
 `divide`: split the parent area into evenly sized sub areas, returns a table of areas
+
 `subloop`: create an area the same size of the parent area, with boundaries clamped to the parent area
 
 
