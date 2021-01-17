@@ -66,16 +66,16 @@ warden.region[1].region[1].loop[1]:push(1)
 ```
 
 --setup buffer regions
-blank_area = warden:divide(2)
+blank_area = warden:divide(2) --available recording areas, divided evenly across softcut buffer space
 
 rec_area = {}
 for i = 1, #blank_area do
-  rec_area[i] = blank_area[i]:subloop()
+  rec_area[i] = blank_area[i]:subloop() --the actual areas of recorded material, clamped to each available blank area
 end
 
 play_area = {}
 for i = 1, #blank_area do
-  play_area[i] = rec_area[i]:subloop()
+  play_area[i] = rec_area[i]:subloop() --the areas of playback, clamped to each area of recorded material
 end
 
 for i = 1, #blank_area do
@@ -97,9 +97,9 @@ end
 
 ```
 --setup buffer regions
-blank_area = warden.divide(warden.buffer[1], 2)
-rec_area = warden.subloop(blank_area)
-play_area = warden.subloop(rec_area)
+blank_area = warden.divide(warden.buffer[1], 2) --available recording areas, divided evenly across softcut buffer 1
+rec_area = warden.subloop(blank_area) --the actual areas of recorded material, clamped to each  available blank area
+play_area = warden.subloop(rec_area) --the areas of playback, clamped to each area of recorded material
 
 for i = 1, #blank_area do
 
