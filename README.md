@@ -60,26 +60,59 @@ warden.region[1].region[1].loop[1]:push(1)
 
 `subloop`: create an area the same size of the parent area, with boundaries clamped to the parent area
 
+`update_voice`: assign the start point, end point, & buffer number of the object to softcut voice
+
 
 ```
+
+--setup buffer regions
 blank_area = warden:divide(2)
 
 rec_area = {}
-for i,v in ipairs(blank_area) do
+for i = 1, #blank_area do
   rec_area[i] = blank_area[i]:subloop()
 end
 
 play_area = {}
-for i,v in ipairs(rec_area) do
+for i = 1, #blank_area do
   play_area[i] = rec_area[i]:subloop()
 end
+
+for i = 1, #blank_area do
+    
+    --set loop points
+    rec_area[i]:set_start(0)
+    rec_area[i]:set_end(1)
+
+    play_area[i]:set_start(0.3, 'fraction')
+    play_area[i]:set_length(0.2, 'fraction')
+    
+    --push to voice
+    play_area[i]:update_voice(i)
+end
+
 ```
 
 ### rev2.1
 
 ```
+--setup buffer regions
 blank_area = warden.divide(warden.buffer[1], 2)
 rec_area = warden.subloop(blank_area)
 play_area = warden.subloop(rec_area)
+
+for i = 1, #blank_area do
+
+    --set loop points
+    rec_area[i]:set_start(0)
+    rec_area[i]:set_end(1)
+
+    play_area[i]:set_start(0.3, 'fraction')
+    play_area[i]:set_length(0.2, 'fraction')
+    
+    --push to voice
+    play_area[i]:update_voice(i)
+end
+
 ```
 
