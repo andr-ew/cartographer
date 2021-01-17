@@ -56,13 +56,29 @@ warden.region[1].region[1].loop[1]:push(1)
 
 # rev2
 
+`divide`: split the parent area into evenly sized sub areas, returns a table of areas
+`subloop`: create an area the same size of the parent area, with boundaries clamped to the parent area
+
+
 ```
-blank_area = warden.divide(6)
+blank_area = warden:divide(2)
+
+rec_area = {}
+for i,v in ipairs(blank_area) do
+  rec_area[i] = blank_area[i]:subloop()
+end
+
+play_area = {}
+for i,v in ipairs(rec_area) do
+  play_area[i] = rec_area[i]:subloop()
+end
+```
+
+### rev2.1
+
+```
+blank_area = warden.divide(buffer[1], 2)
 rec_area = warden.subloop(blank_area)
 play_area = warden.subloop(rec_area)
-
 ```
 
-```
-
-```
