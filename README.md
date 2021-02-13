@@ -2,59 +2,8 @@
 
 simplify the division of softcut buffer space into arbitrary recording and/or playback regions & sub-regions
 
-# rev1
 
-### types
-
-`region`: division, placed end-to-end in buffer space and will not cross another region.
-
-`loop`: may occupy any area within a region, overlap other loops within that region
-
-`warden`: a special case of `region` that occupies the total softcut buffer space
-
-### methods
-
-`:make(type, n)`: initiates `n` of type `region` or `loop` within `warden` or another object created with make. 
-  - `region`s are initiated with start & end points that evenly divide all regions across the parent object. automatically delegates regions across buffers if needed.
-  - `loop`s are initiated with start & end points equal to the parent object
-
-`:s_start(x)`: set the start point in seconds. 0 corresponds to the starting point of the parent object.
-
-`:s_end(x)`: set the end point in seconds. this value is clamped to the length of the parent object.
-
-`:s_len(x)`: set the length in seconds. this value is clamped to the remaining space in the parent object.
-
-`:f_start(x)`: set start point as a fraction of the parent object size.
-
-`:f_end(x)`: set end point as a fraction of the parent object size.
-
-`:f_len(x)`: set the length a fraction of the parent object size. this value is clamped to the remaining space in the parent object.
-
-`:push(n)`: assign the start point, end point, & buffer of the object to the nth softcut voice
-
-### example usage
-
-```
-warden:make(region, 8):make(region, 1):make(loop, 4) -- initiate nested regions regions & loops
-
--- modify start & end points reative to parent objects
-
-warden.region[1]:start(2)
-warden.region[1]:end(3)
-
-warden.region[1].region[1]:s_start(0)
-warden.region[1].region[1]:s_end(1)
-
-warden.region[1].region[1].loop[1]:f_start(0.3)
-warden.region[1].region[1].loop[1]:f_len(0.2)
-
--- push bottom level loop to the first softcut voice
-
-warden.region[1].region[1].loop[1]:push(1)
-
-```
-
-# rev2
+# usage
 
 `divide`: split the parent area into evenly sized sub areas, returns a table of areas
 
@@ -62,44 +11,7 @@ warden.region[1].region[1].loop[1]:push(1)
 
 `update_voice`: assign the start point, end point, & buffer number of the object to softcut voice
 
-
-```
-
---setup buffer regions
-
---available recording areas, divided evenly across softcut buffer space
-blank_area = warden:divide(2)
-
-rec_area = {}
-for i = 1, #blank_area do
-
-  --the actual areas of recorded material, clamped to each available blank area
-  rec_area[i] = blank_area[i]:subloop()
-end
-
-play_area = {}
-for i = 1, #blank_area do
-
-  --the areas of playback, clamped to each area of recorded material
-  play_area[i] = rec_area[i]:subloop()
-end
-
-for i = 1, #blank_area do
-    
-    --set loop points
-    rec_area[i]:set_start(0)
-    rec_area[i]:set_end(1)
-
-    play_area[i]:set_start(0.3, 'fraction')
-    play_area[i]:set_length(0.2, 'fraction')
-    
-    --push to voice
-    play_area[i]:update_voice(i)
-end
-
-```
-
-### rev2.1
+# example
 
 ```
 --setup buffer regions
