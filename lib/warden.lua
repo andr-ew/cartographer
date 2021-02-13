@@ -54,6 +54,15 @@ function Slice:set_length(t, units)
     self.startend[2] = util.clamp(0, self.bounds[2], t + self.startend[1])
 end
 
+function Slice:update_voice(...)
+    local voices = { ... }
+    for i,v in ipairs(voices) do
+        softcut.loop_start(v, self.startend[1])
+        softcut.loop_end(v, self.startend[2])
+        softcut.buffer(v, self.buffer)
+    end
+end
+
 local warden = {}
 warden.buffer = {
     Slice:new {
