@@ -170,3 +170,38 @@ function warden.divide(input, n)
 
     return slices
 end
+
+local tab = require 'tabutil'
+local function split_arg(...)
+    local t, arg = {}, { ... }
+    for i,v in ipairs(arg) do
+        if type(v) == 'table' then
+            table.insert(table.remove(arg, i))
+        end
+    end
+    return t, table.unpack(arg)
+end
+
+--save inputs to disk, args: [input, ], file number, file name
+function warden.save(...)
+    local t, n, name = split_arg(...)
+    local filename = norns.state.data .. (name or 'warden') .. (n or 0) .. ".data"
+    tab.save(t, filename)
+end
+
+--load save file to inputs, args: [input, ], file number, file name 
+function warden.load(...)
+    local t, n, name = split_arg(...)
+    local filename = norns.state.data .. (name or 'warden') .. (n or 0) .. ".data"
+    local data = tab.load(filename)
+    
+    local function set(t, data)
+        if t.is_slice then
+            t.startend[1] = data.startend[1]
+            t.startend[2] = data.startend[2]
+        else
+            for k,v in pairs(t) do set(t[k], data[k]) end
+        end
+    end
+    set(t, data)
+end
