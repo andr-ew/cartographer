@@ -148,7 +148,7 @@ function warden.divide(input, n)
                 return 'warden.divide: n must be evenly divisible by the number of input slices!'
             end
             for k,v in pairs(slice) do
-                add_division(v, this_n / #slice)
+                add_divisions(v, this_n / #slice)
             end
         end
     end
