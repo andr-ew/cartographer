@@ -1,18 +1,36 @@
 # warden
 
-simplify the division of softcut buffer space into arbitrary recording and/or playback regions & sub-regions
-
+divide softcut buffer space into arbitrarily nested recording and/or playback slices.
 
 # usage
 
-`divide`: split the parent area into evenly sized sub areas, returns a table of areas
+buffers:
+`warden.buffer`: a table of two mono slices for each softcut buffer.
+`warden.buffer_stereo`: the buffers as one stereo slice.
 
-`subloop`: create an area the same size of the parent area, with boundaries clamped to the parent area
+constructors:
+`warden.divide(input)`: split the input slice into evenly sized slices. returns a table.
+`warden.subloop(input, n)`: create `n` slices clamped to the input slice or slices. returns a slice or a table.
 
-`update_voice`: assign the start point, end point, & buffer number of the object to softcut voice
+setters & getters:
+`Slice:set_start(t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
+`Slice:set_end(t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
+`Slice:set_length(t, <'seconds' or 'fraction'>)` 
+`Slice:get_start(<'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
+`Slice:get_end(<'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
+`Slice:get_length(<'seconds' or 'fraction'>)`
+
+methods:
+`Slice:update_voice([voice, ])`: send the start point, end point, & buffer(s) of the slice to softcut voice(s).
+`Slice:phase_relative(phase, <'seconds' or 'fraction'>)`: scale phase from `phase_event`
+`Slice:clear()`
+`Slice:copy(source_slice, fade_time, reverse)`
+`Slice:read(file, start_src, ch_src)`
+`Slice:write(file)`: `buffer_write_`
+`Slice:render(samples)`: `render_buffer`
 
 # example
-
+```
 --setup buffer regions
 
 --available recording areas, divided evenly across softcut buffer 1
@@ -36,4 +54,4 @@ for i = 1, #blank_area do
     --push to voice
     play_area[i]:update_voice(i)
 end
-
+```
