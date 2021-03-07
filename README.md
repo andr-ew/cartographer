@@ -26,8 +26,8 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 - `Slice:clear()`
 - `Slice:copy(source_slice, fade_time, reverse)`
 - `Slice:read(file, start_src, ch_src)`
-- `Slice:write(file)`: `buffer_write_`
-- `Slice:render(samples)`: `render_buffer`
+- `Slice:write(file)`
+- `Slice:render(samples)`
 
 # example
 ```
