@@ -45,6 +45,11 @@ end
 function Slice:get_length()
     return self.startend[2] - self.startend[1]
 end
+function Slice:phase_relative(phase, units)
+    local s = phase - self.startend[1]
+    if units == 'fraction' then return s / self:get_length()
+    else return s end
+end
 
 function Slice:set_buffer(b) self.buffer = (type(b) == 'table') and b or { b } end
 function Slice:set_start(t, units, abs)
@@ -53,14 +58,12 @@ function Slice:set_start(t, units, abs)
         self.startend[1] = util.clamp(self.bounds[1], self.startend[2], t + self.bounds[1])
     end
 end
-
 function Slice:set_end(t, units, abs)
     if abs == 'absolute' then self.startend[2] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[2] = util.clamp(self.startend[1], self.bounds[2], t + self.bounds[1])
     end
 end
-
 function Slice:set_length(t, units)
     t = (units == "fraction") and self:f_to_s(t) or t
     self.startend[2] = util.clamp(0, self.bounds[2], t + self.startend[1])
@@ -77,6 +80,54 @@ function Slice:update_voice(...)
         softcut.loop_end(v, self.startend[2])
         softcut.buffer(v, b[(i - 1)%(#b) + 1])
     end
+end
+function Slice:clear()
+    if #self.buffer == 1 then
+        softcut.buffer_clear_region_channel(self.buffer[1], self.startend[1], self.startend[2])
+    else
+        softcut.buffer_clear_region(self.startend[1], self.startend[2])
+    end
+end
+function Slice:copy(src, fade_time, reverse)
+    local dst = self
+    if #self.buffer == 1 then
+        softcut.buffer_copy_mono(
+            src.buffer[1], dst.buffer[1],
+            src.startend[1], dst.startend[1],
+            dst:get_length(), fade_time, reverse
+        )
+    else
+        softcut.buffer_copy_stereo(
+            src.startend[1], dst.startend[1],
+            dst:get_length(), fade_time, reverse
+        )
+    end
+end
+function Slice:read(file, start_src, ch_src)
+    local dst = self
+    start_src = start_src or 0
+    ch_src = ch_src or 1
+
+    if #self.buffer == 1 then
+        softcut.buffer_read_mono(file, 
+            start_src, dst.startend[1], dst:get_length(), 
+            ch_src, dst.buffer[1]
+        )
+    else
+        softcut.buffer_read_stereo(file, 
+            start_src, dst.startend[1], dst:get_length()
+        )
+    end
+end
+function Slice:write(file)
+    if #self.buffer == 1 then
+        softcut.buffer_write_mono(file, self.startend[1], self:get_length(), self.buffer[1])
+    else
+        softcut.buffer_write_stereo(file, self.startend[1], self:get_length())
+    end
+end
+function Slice:render(samples)
+    softcut.render_buffer(self.buffer[1], self.startend[1], self:get_length(), samples)
 end
 
 warden.buffer = {
