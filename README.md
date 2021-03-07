@@ -23,6 +23,7 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 ### methods:
 - `Slice:update_voice([voice, ])`: send the start point, end point, & buffer(s) of the slice to softcut voice(s).
 - `Slice:phase_relative(phase, <'seconds' or 'fraction'>)`: scale phase from `phase_event`
+- `Slice:position(voice, value, units)`: set position relative to slice
 - `Slice:clear()`
 - `Slice:copy(source_slice, fade_time, reverse)`
 - `Slice:read(file, start_src, ch_src)`
