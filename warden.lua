@@ -1,46 +1,5 @@
 local warden = {}
-
-warden.help = [[
-# warden
-
-simplify the division of softcut buffer space into arbitrary recording and/or playback regions & sub-regions
-
-
-# usage
-
-`divide`: split the parent area into evenly sized sub areas, returns a table of areas
-
-`subloop`: create an area the same size of the parent area, with boundaries clamped to the parent area
-
-`update_voice`: assign the start point, end point, & buffer number of the object to softcut voice
-
-# example
-
---setup buffer regions
-
---available recording areas, divided evenly across softcut buffer 1
-blank_area = warden.divide(warden.buffer[1], 2)
-
---the actual areas of recorded material, clamped to each  available blank area
-rec_area = warden.subloop(blank_area)
-
---the areas of playback, clamped to each area of recorded material
-play_area = warden.subloop(rec_area)
-
-for i = 1, #blank_area do
-
-    --set loop points
-    rec_area[i]:set_start(0)
-    rec_area[i]:set_end(1)
-
-    play_area[i]:set_start(0.3, 'fraction')
-    play_area[i]:set_length(0.2, 'fraction')
-    
-    --push to voice
-    play_area[i]:update_voice(i)
-end
-
-]]
+warden.help = [[ ]]
 
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
 
@@ -49,6 +8,8 @@ local Slice = { is_slice = true }
 -- create a new slice from an old slice (the warden object handles this)
 function Slice:new(o)
     o = o or {}
+
+    o.buffer = self.buffer
 
     --new bounds is assigned to old startend
     o.bounds = o.bounds or self.startend
@@ -62,20 +23,22 @@ end
 
 function Slice:s_to_f(s) return s / self:get_boundary_length() end
 function Slice:f_to_s(f) return f * self:get_boundary_length() end
-function Slice:get_buffer() return self.buffer end
+function Slice:get_buffer() return table.unpack(self.buffer) end
 function Slice:get_boundary_start() return self.bounds[1] end
 function Slice:get_boundary_end() return self.bounds[2] end
 function Slice:get_boundary_length() return self.bounds[2] - self.bounds[1] end
 
-function Slice:get_start(units) 
+function Slice:get_start(units, abs) 
+    if abs == 'absolute' then return self.startend[1] end
+    
     local s = self.startend[1] - self.bounds[1] 
-
     if units == "fraction" then return self:s_to_f(s)
     else return s end
 end
-function Slice:get_end(units)
+function Slice:get_end(units, abs)
+    if abs == 'absolute' then return self.startend[2] end
+
     local s = self.startend[2] - self.bounds[1] 
-    
     if units == "fraction" then return self:s_to_f(s)
     else return s end
 end
@@ -83,14 +46,19 @@ function Slice:get_length()
     return self.startend[2] - self.startend[1]
 end
 
-function Slice:set_start(t, units)
-    t = (units == "fraction") and self:f_to_s(t) or t
-    self.startend[1] = util.clamp(self.bounds[1], self.startend[2], t + self.bounds[1])
+function Slice:set_buffer(b) self.buffer = (type(b) == 'table') and b or { b } end
+function Slice:set_start(t, units, abs)
+    if abs == 'absolute' then self.startend[1] = t else
+        t = (units == "fraction") and self:f_to_s(t) or t
+        self.startend[1] = util.clamp(self.bounds[1], self.startend[2], t + self.bounds[1])
+    end
 end
 
-function Slice:set_end(t, units)
-    t = (units == "fraction") and self:f_to_s(t) or t
-    self.startend[2] = util.clamp(self.startend[1], self.bounds[2], t + self.bounds[1])
+function Slice:set_end(t, units, abs)
+    if abs == 'absolute' then self.startend[2] = t else
+        t = (units == "fraction") and self:f_to_s(t) or t
+        self.startend[2] = util.clamp(self.startend[1], self.bounds[2], t + self.bounds[1])
+    end
 end
 
 function Slice:set_length(t, units)
@@ -99,22 +67,32 @@ function Slice:set_length(t, units)
 end
 
 function Slice:update_voice(...)
-    local voices = { ... }
-    for i,v in ipairs(voices) do
+    --re-clamp start/end
+    self.startend[1] = util.clamp(self.bounds[1], self.bounds[2], self.startend[1])
+    self.startend[2] = util.clamp(self.startend[1], self.bounds[2], self.startend[2])
+
+    local b = self.buffer
+    for i,v in ipairs {...} do
         softcut.loop_start(v, self.startend[1])
         softcut.loop_end(v, self.startend[2])
-        softcut.buffer(v, self.buffer)
+        softcut.buffer(v, b[(i - 1)%(#b) + 1])
     end
 end
 
 warden.buffer = {
     Slice:new {
         startend = { 0, buf_time },
-        buffer = 1
+        buffer = { 1 }
     },
     Slice:new {
         startend = { 0, buf_time },
-        buffer = 2
+        buffer = { 2 }
+    }
+}
+warden.buffer_stereo = {
+    Slice:new {
+        startend = { 0, buf_time },
+        buffer = { 1, 2 }
     }
 }
 
