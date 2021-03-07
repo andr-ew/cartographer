@@ -41,8 +41,10 @@ function Slice:get_end(units, abs)
     if units == "fraction" then return self:s_to_f(s)
     else return s end
 end
-function Slice:get_length()
-    return self.startend[2] - self.startend[1]
+function Slice:get_length(units)
+    local s = self.startend[2] - self.startend[1]
+    if units == "fraction" then return self:s_to_f(s)
+    else return s end
 end
 function Slice:phase_relative(phase, units)
     local s = phase - self.startend[1]
@@ -79,6 +81,10 @@ function Slice:update_voice(...)
         softcut.loop_end(v, self.startend[2])
         softcut.buffer(v, b[(i - 1)%(#b) + 1])
     end
+end
+function Slice:position(voice, t, units)
+    t = self.bounds[1] + ((units == "fraction") and self:f_to_s(t) or t)
+    softcut.position(voice, t)
 end
 function Slice:clear()
     if #self.buffer == 1 then
