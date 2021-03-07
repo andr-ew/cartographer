@@ -8,7 +8,6 @@ local Slice = { is_slice = true }
 -- create a new slice from an old slice (the warden object handles this)
 function Slice:new(o)
     o = o or {}
-
     o.buffer = self.buffer
 
     --new bounds is assigned to old startend
