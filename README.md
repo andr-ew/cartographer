@@ -9,8 +9,8 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 - `warden.buffer_stereo`: the buffers as one stereo slice.
 
 ### constructors:
-- `warden.divide(input)`: split the input slice into evenly sized slices. returns a table.
-- `warden.subloop(input, n)`: create `n` slices clamped to the input slice or slices. returns a slice or a table.
+- `warden.divide(input, n)`: divide the input slice(s) into `n` evenly sized subslices. returns a table.
+- `warden.subloop(input, n)`: create `n` subslices clamped to the input slice or slices. returns a slice or a table.
 
 ### setters & getters:
 - `Slice:set_start(t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
@@ -29,6 +29,11 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 - `Slice:read(file, start_src, ch_src)`
 - `Slice:write(file)`
 - `Slice:render(samples)`
+
+### state
+
+- `warden.save([input, ], file number, file name)`: save slice tables to disk
+- `warden.load([input, ], file number, file name)`: load save file to slice tables
 
 # example
 ```
