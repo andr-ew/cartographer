@@ -8,13 +8,13 @@ local Slice = { is_slice = true }
 -- create a new slice from an old slice (the warden object handles this)
 function Slice:new(o)
     o = o or {}
-    o.buffer = self.buffer
+    o.buffer = rawget(o, 'buffer') or self.buffer
 
     --new bounds is assigned to old startend
-    o.bounds = o.bounds or self.startend
+    o.bounds = rawget(o, 'bounds') or self.startend
 
     --new startend defaults to a copy of new bounds
-    o.startend = o.startend or { o.bounds[1], o.bounds[2] }
+    o.startend = rawget(o, 'startend') or { o.bounds[1], o.bounds[2] }
     
     setmetatable(o, { __index = self })
     return o
@@ -145,11 +145,9 @@ warden.buffer = {
         buffer = { 2 }
     }
 }
-warden.buffer_stereo = {
-    Slice:new {
-        startend = { 0, buf_time },
-        buffer = { 1, 2 }
-    }
+warden.buffer_stereo = Slice:new {
+    startend = { 0, buf_time },
+    buffer = { 1, 2 }
 }
 
 -- create n slices bound by the input
@@ -187,7 +185,7 @@ function warden.divide(input, n)
         end
     end
 
-    local err = add_divistions(input, n)
+    local err = add_divisions(input, n)
     if err then print(err); return end
 
     for _, div in ipairs(divisions) do
