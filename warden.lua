@@ -239,3 +239,5 @@ function warden.load(...)
     end
     set(t, data)
 end
+
+return warden
