@@ -19,6 +19,9 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 - `Slice:get_start(<'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
 - `Slice:get_end(<'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
 - `Slice:get_length(<'seconds' or 'fraction'>)`
+- `Slice:delta_start(t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
+- `Slice:delta_end(t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
+- `Slice:delta_length(t, <'seconds' or 'fraction'>)`
 
 ### methods:
 - `Slice:update_voice([voice, ])`: send the start point, end point, & buffer(s) of the slice to softcut voice(s).
