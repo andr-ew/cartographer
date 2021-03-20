@@ -69,6 +69,15 @@ function Slice:set_length(t, units)
     t = (units == "fraction") and self:f_to_s(t) or t
     self.startend[2] = util.clamp(0, self.bounds[2], t + self.startend[1])
 end
+function Slice:delta_start(delta, units, abs)
+    self:set_start(self:get_start(units, abs) + delta, units, abs)
+end
+function Slice:delta_end(delta, units, abs)
+    self:set_end(self:get_end(units, abs) + delta, units, abs)
+end
+function Slice:delta_length(delta, units)
+    self:set_length(self:get_length(units) + delta, units)
+end
 
 function Slice:update_voice(...)
     --re-clamp start/end
