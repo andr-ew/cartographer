@@ -59,18 +59,18 @@ function Slice:set_buffer(b) self.buffer = (type(b) == 'table') and b or { b } e
 function Slice:set_start(t, units, abs)
     if abs == 'absolute' then self.startend[1] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
-        self.startend[1] = util.clamp(self.bounds[1], self.startend[2], t + self.bounds[1])
+        self.startend[1] = util.clamp(t + self.bounds[1], self.bounds[1], self.startend[2])
     end
 end
 function Slice:set_end(t, units, abs)
     if abs == 'absolute' then self.startend[2] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
-        self.startend[2] = util.clamp(self.startend[1], self.bounds[2], t + self.bounds[1])
+        self.startend[2] = util.clamp(t + self.bounds[1], self.startend[1], self.bounds[2])
     end
 end
 function Slice:set_length(t, units)
     t = (units == "fraction") and self:f_to_s(t) or t
-    self.startend[2] = util.clamp(0, self.bounds[2], t + self.startend[1])
+    self.startend[2] = util.clamp(t + self.startend[1], 0, self.bounds[2])
 end
 function Slice:delta_start(delta, units, abs)
     self:set_start(self:get_start(units, abs) + delta, units, abs)
@@ -83,7 +83,9 @@ function Slice:delta_length(delta, units)
 end
 
 function Slice:expand()
-    self.startend = { self.bounds[1], self.bounds[2] }
+    --self.startend = { self.bounds[1], self.bounds[2] }
+    self.startend[1] = self.bounds[1]
+    self.startend[2] = self.bounds[2]
     self:expand_children()
 end
 function Slice:expand_children()
@@ -91,7 +93,7 @@ function Slice:expand_children()
         v:expand()
     end
 end
-local headroom = 5
+local headroom = 0
 local function quant(self)
     if type(self.quantum) == 'function' then return self.quantum()
     else return self.quantum or 0.01 end
@@ -99,14 +101,15 @@ end
 function Slice:punch_in()
     self.t = 0
     self.startend[1] = self.bounds[1]
+    self:expand_children()
 
     self.clock = clock.run(function()
         while true do
             local q = math.abs(quant(self)) --in the future, use a getter for sofcut.rate
+            clock.sleep(q)
             self.t = self.t + q
             self:set_end(self.t + headroom*q)
             self:expand_children()
-            clock.sleep(q)
         end
     end)
 end
@@ -116,13 +119,14 @@ function Slice:punch_out()
         self:set_end(self.t)
         self:expand_children()
         self.t = 0
+        self.clock = nil
     end
 end
 
 function Slice:update_voice(...)
     --re-clamp start/end
-    self.startend[1] = util.clamp(self.bounds[1], self.bounds[2], self.startend[1])
-    self.startend[2] = util.clamp(self.startend[1], self.bounds[2], self.startend[2])
+    self.startend[1] = util.clamp(self.startend[1], self.bounds[1], self.bounds[2])
+    self.startend[2] = util.clamp(self.startend[2], self.startend[1], self.bounds[2])
 
     local b = self.buffer
     for i,v in ipairs {...} do
