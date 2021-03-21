@@ -3,11 +3,13 @@ warden.help = [[ ]]
 
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
 
-local Slice = { is_slice = true }
+local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 
--- create a new slice from an old slice (the warden object handles this)
+--create a new slice from an old slice (the warden object handles this)
 function Slice:new(o)
     o = o or {}
+    o.children = {}
+
     o.buffer = rawget(o, 'buffer') or self.buffer
 
     --new bounds is assigned to old startend
@@ -16,6 +18,7 @@ function Slice:new(o)
     --new startend defaults to a copy of new bounds
     o.startend = rawget(o, 'startend') or { o.bounds[1], o.bounds[2] }
     
+    table.insert(self.children, o)
     setmetatable(o, { __index = self })
     return o
 end
@@ -77,6 +80,43 @@ function Slice:delta_end(delta, units, abs)
 end
 function Slice:delta_length(delta, units)
     self:set_length(self:get_length(units) + delta, units)
+end
+
+function Slice:expand()
+    self.startend = { self.bounds[1], self.bounds[2] }
+    self:expand_children()
+end
+function Slice:expand_children()
+    for i,v in ipairs(self.children) do
+        v:expand()
+    end
+end
+local headroom = 5
+local function quant(self)
+    if type(self.quantum) == 'function' then return self.quantum()
+    else return self.quantum or 0.01 end
+end
+function Slice:punch_in()
+    self.t = 0
+    self.startend[1] = self.bounds[1]
+
+    self.clock = clock.run(function()
+        while true do
+            local q = math.abs(quant(self)) --in the future, use a getter for sofcut.rate
+            self.t = self.t + q
+            self:set_end(self.t + headroom*q)
+            self:expand_children()
+            clock.sleep(q)
+        end
+    end)
+end
+function Slice:punch_out()
+    if self.clock then
+        clock.cancel(self.clock)
+        self:set_end(self.t)
+        self:expand_children()
+        self.t = 0
+    end
 end
 
 function Slice:update_voice(...)
