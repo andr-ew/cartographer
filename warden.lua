@@ -2,6 +2,7 @@ local warden = {}
 warden.help = [[ ]]
 
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
+local voice_count = 6
 
 local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 
@@ -9,6 +10,8 @@ local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 function Slice:new(o)
     o = o or {}
     o.children = {}
+
+    o.voices = {}
 
     o.buffer = rawget(o, 'buffer') or self.buffer
 
@@ -55,22 +58,46 @@ function Slice:phase_relative(phase, units)
     else return s end
 end
 
-function Slice:set_buffer(b) self.buffer = (type(b) == 'table') and b or { b } end
+function Slice:update()
+    --re-clamp start/end
+    self.startend[1] = util.clamp(self.startend[1], self.bounds[1], self.bounds[2])
+    self.startend[2] = util.clamp(self.startend[2], self.startend[1], self.bounds[2])
+
+    local b = self.buffer
+    for i,v in ipairs(self.voices) do
+        softcut.loop_start(v, self.startend[1])
+        softcut.loop_end(v, self.startend[2])
+        softcut.buffer(v, b[(i - 1)%(#b) + 1])
+    end
+
+    --propagate downward
+    for i,v in ipairs(self.children) do
+        v:update()
+    end
+end
+
+function Slice:set_buffer(b) 
+    self.buffer = (type(b) == 'table') and b or { b } 
+    self:update()
+end
 function Slice:set_start(t, units, abs)
     if abs == 'absolute' then self.startend[1] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[1] = util.clamp(t + self.bounds[1], self.bounds[1], self.startend[2])
     end
+    self:update()
 end
 function Slice:set_end(t, units, abs)
     if abs == 'absolute' then self.startend[2] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[2] = util.clamp(t + self.bounds[1], self.startend[1], self.bounds[2])
     end
+    self:update()
 end
 function Slice:set_length(t, units)
     t = (units == "fraction") and self:f_to_s(t) or t
     self.startend[2] = util.clamp(t + self.startend[1], 0, self.bounds[2])
+    self:update()
 end
 function Slice:delta_start(delta, units, abs)
     self:set_start(self:get_start(units, abs) + delta, units, abs)
@@ -82,15 +109,16 @@ function Slice:delta_length(delta, units)
     self:set_length(self:get_length(units) + delta, units)
 end
 
-function Slice:expand()
+function Slice:expand(silent)
     --self.startend = { self.bounds[1], self.bounds[2] }
     self.startend[1] = self.bounds[1]
     self.startend[2] = self.bounds[2]
     self:expand_children()
+    if not silent then self:update() end
 end
-function Slice:expand_children()
+function Slice:expand_children(silent)
     for i,v in ipairs(self.children) do
-        v:expand()
+        v:expand(silent)
     end
 end
 local headroom = 0
@@ -101,6 +129,7 @@ end
 function Slice:punch_in()
     self.t = 0
     self.startend[1] = self.bounds[1]
+    self:update()
     self:expand_children()
 
     self.clock = clock.run(function()
@@ -108,8 +137,9 @@ function Slice:punch_in()
             local q = math.abs(quant(self)) --in the future, use a getter for sofcut.rate
             clock.sleep(q)
             self.t = self.t + q
-            self:set_end(self.t + headroom*q)
-            self:expand_children()
+            --self:set_end(self.t + headroom*q)
+            self.startend[2] = self.bounds[1] + self.t + headroom*q
+            self:expand_children(true)
         end
     end)
 end
@@ -123,21 +153,14 @@ function Slice:punch_out()
     end
 end
 
-function Slice:update_voice(...)
-    --re-clamp start/end
-    self.startend[1] = util.clamp(self.startend[1], self.bounds[1], self.bounds[2])
-    self.startend[2] = util.clamp(self.startend[2], self.startend[1], self.bounds[2])
-
-    local b = self.buffer
-    for i,v in ipairs {...} do
-        softcut.loop_start(v, self.startend[1])
-        softcut.loop_end(v, self.startend[2])
-        softcut.buffer(v, b[(i - 1)%(#b) + 1])
+function Slice:position(t, units)
+    t = self.bounds[1] + ((units == "fraction") and self:f_to_s(t) or t)
+    for i,v in ipairs(self.voices) do
+        softcut.position(v, t)
     end
 end
-function Slice:position(voice, t, units)
-    t = self.bounds[1] + ((units == "fraction") and self:f_to_s(t) or t)
-    softcut.position(voice, t)
+function Slice:trigger()
+    self:position(0)
 end
 function Slice:clear()
     if #self.buffer == 1 then
@@ -188,6 +211,53 @@ function Slice:render(samples)
     softcut.render_buffer(self.buffer[1], self.startend[1], self:get_length(), samples)
 end
 
+Bundle = { is_bundle = true }
+
+function Bundle:new(o)
+    o = o or {}
+
+    setmetatable(o, {
+        __index = function(t, k)
+            if Bundle[k] ~= nil then return Bundle[k]
+            else return function(s, n, ...)
+
+                --search slices for assignment
+                for i,slice in pairs(s) do
+                    if slice.is_slice == true then ---------------------recursion needed
+                        for j,vc in ipairs(slice.voices) do
+                            if vc == n then
+                                return slice[k](slice, ...)
+                            end
+                        end
+                    else
+                    end
+                end
+
+                local function search_children(sl)
+                    for i,slice in ipairs(sl.children) do
+                        for j,vc in ipairs(slice.voices) do
+                            if vc == n then return true end
+                        end
+                        return search_children(slice)
+                    end
+                end
+
+                --check for the assignment in slice ancestors
+                for i,slice in pairs(s) do
+                    if slice.is_slice == true then
+                        if search_children(slice) then
+                            return slice[k](slice, ...)
+                        end
+                    else
+                    end
+                end
+            end end
+        end
+    })
+
+    return o
+end
+
 warden.buffer = {
     Slice:new {
         startend = { 0, buf_time },
@@ -203,30 +273,64 @@ warden.buffer_stereo = Slice:new {
     buffer = { 1, 2 }
 }
 
+warden.assignments = {}
+
+-- assign input to voice indicies
+function warden.assign(input, ...)
+    local voices = { ... }
+    if #voices == 0 then voices[1] = 1 end
+
+    local function asgn(sl, vcs)
+        if sl.is_slice == true then
+            for _,n in ipairs(vcs) do
+                if n <= voice_count then
+                    if warden.assignments[n] then
+                        warden.assinments[n].voices = {}
+                    end
+                    
+                    warden.assignments[n] = sl
+                    table.insert(sl.voices, n)
+                else
+                    print('warden.assign: cannot assign a voice index greater than ' .. voice_count)
+                end
+            end
+            sl:update()
+        else
+            for i,ssl in ipairs(sl) do
+                asgn(ssl, { vcs[i] or (vcs[#vcs] + i - 1) })
+            end
+        end
+    end
+
+    asgn(input, voices)
+end
+
 -- create n slices bound by the input
 function warden.subloop(input, n)
     n = n or 1
 
-    if input.is_slice and n == 1 then
+    if input.is_slice == true and n == 1 then
         return input:new()
-    elseif input.is_slice then
-        local slices = {}
+    elseif input.is_slice == true then
+        local slices = Bundle:new()
         for i = 1, n do slices[i] = warden.subloop(input, 1) end
         return slices
     else
-        local slices = {}
-        for k,v in pairs(input) do slices[k] = warden.subloop(v, n) end
+        local slices = Bundle:new()
+        for k,v in pairs(input) do 
+            slices[k] = warden.subloop(v, n) 
+        end
         return slices
     end
 end
 
 -- divide input into n slices of equal length
 function warden.divide(input, n)
-    local slices = {}
+    local slices = Bundle:new()
     local divisions = {}
 
     local function add_divisions(slice, this_n)
-        if slice.is_slice then
+        if slice.is_slice == true then
             table.insert(divisions, { n = this_n, slice = slice })
         else
             if this_n % #slice ~= 0 then 
@@ -281,7 +385,7 @@ function warden.load(...)
     local data = tab.load(filename)
     
     local function set(t, data)
-        if t.is_slice then
+        if t.is_slice == true then
             t.startend[1] = data.startend[1]
             t.startend[2] = data.startend[2]
         else
