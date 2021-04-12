@@ -2,6 +2,7 @@ local warden = {}
 warden.help = [[ ]]
 
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
+local voice_count = 6
 
 local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 
@@ -9,6 +10,8 @@ local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 function Slice:new(o)
     o = o or {}
     o.children = {}
+
+    o.voices = {}
 
     o.buffer = rawget(o, 'buffer') or self.buffer
 
@@ -56,6 +59,7 @@ function Slice:phase_relative(phase, units)
 end
 
 function Slice:set_buffer(b) self.buffer = (type(b) == 'table') and b or { b } end
+
 function Slice:set_start(t, units, abs)
     if abs == 'absolute' then self.startend[1] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
@@ -188,6 +192,53 @@ function Slice:render(samples)
     softcut.render_buffer(self.buffer[1], self.startend[1], self:get_length(), samples)
 end
 
+Bundle = { is_bundle = true }
+
+function Bundle:new(o)
+    o = o or {}
+
+    setmetatable(o, {
+        __index = function(t, k)
+            if Bundle[k] ~= nil then return Bundle[k]
+            else return function(s, n, ...)
+
+                --search slices for assignment
+                for k,slice in pairs(s) do
+                    if slice.is_slice then ---------------------recursion needed
+                        for j,vc in ipairs(slice.voices) do
+                            if vc == n then
+                                return slice[k](slice, ...)
+                            end
+                        end
+                    else
+                    end
+                end
+
+                local function search_children(sl)
+                    for i,slice in ipairs(sl.children) do
+                        for j,vc in ipairs(slice.voices) do
+                            if vc == n then return true end
+                        end
+                        return search_children(slice)
+                    end
+                end
+
+                --check for the assignment in slice ancestors
+                for k,slice in pairs(s) do
+                    if slice.is_slice then
+                        if search_children(slice) then
+                            return slice[k](slice, ...)
+                        end
+                    else
+                    end
+                end
+            end end
+        end
+    })
+
+    return o
+end
+
 warden.buffer = {
     Slice:new {
         startend = { 0, buf_time },
@@ -203,6 +254,37 @@ warden.buffer_stereo = Slice:new {
     buffer = { 1, 2 }
 }
 
+warden.assignments = {}
+
+-- assign input to voice indicies
+function warden.assign(input, ...)
+    local voices = { ... }
+    if #voices == 0 then voices[1] = 1 end
+
+    local function asgn(sl, vcs)
+        if sl.is_slice then
+            for _,n in ipairs(vcs) do
+                if n <= voice_count then
+                    if warden.assignments[n] then
+                        warden.assinments[n].voices = {}
+                    end
+                    
+                    warden.assignments[n] = sl
+                    table.insert(sl.voices, n)
+                else
+                    print('warden.assign: cannot assign a voice index greater than ' .. voice_count)
+                end
+            end
+        else
+            for i,ssl in ipairs(sl) do
+                asgn(ssl, { vcs[i] or (vcs[#vcs] + i - 1) })
+            end
+        end
+    end
+
+    asgn(input, voices)
+end
+
 -- create n slices bound by the input
 function warden.subloop(input, n)
     n = n or 1
@@ -210,11 +292,11 @@ function warden.subloop(input, n)
     if input.is_slice and n == 1 then
         return input:new()
     elseif input.is_slice then
-        local slices = {}
+        local slices = Bundle:new()
         for i = 1, n do slices[i] = warden.subloop(input, 1) end
         return slices
     else
-        local slices = {}
+        local slices = Bundle:new()
         for k,v in pairs(input) do slices[k] = warden.subloop(v, n) end
         return slices
     end
@@ -222,7 +304,7 @@ end
 
 -- divide input into n slices of equal length
 function warden.divide(input, n)
-    local slices = {}
+    local slices = Bundle:new()
     local divisions = {}
 
     local function add_divisions(slice, this_n)
