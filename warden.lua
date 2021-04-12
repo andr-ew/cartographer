@@ -109,16 +109,16 @@ function Slice:delta_length(delta, units)
     self:set_length(self:get_length(units) + delta, units)
 end
 
-function Slice:expand()
+function Slice:expand(silent)
     --self.startend = { self.bounds[1], self.bounds[2] }
     self.startend[1] = self.bounds[1]
     self.startend[2] = self.bounds[2]
     self:expand_children()
-    self:update()
+    if not silent then self:update() end
 end
-function Slice:expand_children()
+function Slice:expand_children(silent)
     for i,v in ipairs(self.children) do
-        v:expand()
+        v:expand(silent)
     end
 end
 local headroom = 0
@@ -137,8 +137,9 @@ function Slice:punch_in()
             local q = math.abs(quant(self)) --in the future, use a getter for sofcut.rate
             clock.sleep(q)
             self.t = self.t + q
-            self:set_end(self.t + headroom*q)
-            self:expand_children()
+            --self:set_end(self.t + headroom*q)
+            self.startend[2] = self.bounds[1] + self.t + headroom*q
+            self:expand_children(true)
         end
     end)
 end
@@ -221,8 +222,8 @@ function Bundle:new(o)
             else return function(s, n, ...)
 
                 --search slices for assignment
-                for k,slice in pairs(s) do
-                    if slice.is_slice then ---------------------recursion needed
+                for i,slice in pairs(s) do
+                    if slice.is_slice == true then ---------------------recursion needed
                         for j,vc in ipairs(slice.voices) do
                             if vc == n then
                                 return slice[k](slice, ...)
@@ -242,8 +243,8 @@ function Bundle:new(o)
                 end
 
                 --check for the assignment in slice ancestors
-                for k,slice in pairs(s) do
-                    if slice.is_slice then
+                for i,slice in pairs(s) do
+                    if slice.is_slice == true then
                         if search_children(slice) then
                             return slice[k](slice, ...)
                         end
@@ -280,7 +281,7 @@ function warden.assign(input, ...)
     if #voices == 0 then voices[1] = 1 end
 
     local function asgn(sl, vcs)
-        if sl.is_slice then
+        if sl.is_slice == true then
             for _,n in ipairs(vcs) do
                 if n <= voice_count then
                     if warden.assignments[n] then
@@ -308,15 +309,17 @@ end
 function warden.subloop(input, n)
     n = n or 1
 
-    if input.is_slice and n == 1 then
+    if input.is_slice == true and n == 1 then
         return input:new()
-    elseif input.is_slice then
+    elseif input.is_slice == true then
         local slices = Bundle:new()
         for i = 1, n do slices[i] = warden.subloop(input, 1) end
         return slices
     else
         local slices = Bundle:new()
-        for k,v in pairs(input) do slices[k] = warden.subloop(v, n) end
+        for k,v in pairs(input) do 
+            slices[k] = warden.subloop(v, n) 
+        end
         return slices
     end
 end
@@ -327,7 +330,7 @@ function warden.divide(input, n)
     local divisions = {}
 
     local function add_divisions(slice, this_n)
-        if slice.is_slice then
+        if slice.is_slice == true then
             table.insert(divisions, { n = this_n, slice = slice })
         else
             if this_n % #slice ~= 0 then 
@@ -382,7 +385,7 @@ function warden.load(...)
     local data = tab.load(filename)
     
     local function set(t, data)
-        if t.is_slice then
+        if t.is_slice == true then
             t.startend[1] = data.startend[1]
             t.startend[2] = data.startend[2]
         else
