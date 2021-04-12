@@ -58,23 +58,46 @@ function Slice:phase_relative(phase, units)
     else return s end
 end
 
-function Slice:set_buffer(b) self.buffer = (type(b) == 'table') and b or { b } end
+function Slice:update()
+    --re-clamp start/end
+    self.startend[1] = util.clamp(self.startend[1], self.bounds[1], self.bounds[2])
+    self.startend[2] = util.clamp(self.startend[2], self.startend[1], self.bounds[2])
 
+    local b = self.buffer
+    for i,v in ipairs(self.voices) do
+        softcut.loop_start(v, self.startend[1])
+        softcut.loop_end(v, self.startend[2])
+        softcut.buffer(v, b[(i - 1)%(#b) + 1])
+    end
+
+    --propagate downward
+    for i,v in ipairs(self.children) do
+        v:update()
+    end
+end
+
+function Slice:set_buffer(b) 
+    self.buffer = (type(b) == 'table') and b or { b } 
+    self:update()
+end
 function Slice:set_start(t, units, abs)
     if abs == 'absolute' then self.startend[1] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[1] = util.clamp(t + self.bounds[1], self.bounds[1], self.startend[2])
     end
+    self:update()
 end
 function Slice:set_end(t, units, abs)
     if abs == 'absolute' then self.startend[2] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[2] = util.clamp(t + self.bounds[1], self.startend[1], self.bounds[2])
     end
+    self:update()
 end
 function Slice:set_length(t, units)
     t = (units == "fraction") and self:f_to_s(t) or t
     self.startend[2] = util.clamp(t + self.startend[1], 0, self.bounds[2])
+    self:update()
 end
 function Slice:delta_start(delta, units, abs)
     self:set_start(self:get_start(units, abs) + delta, units, abs)
@@ -91,6 +114,7 @@ function Slice:expand()
     self.startend[1] = self.bounds[1]
     self.startend[2] = self.bounds[2]
     self:expand_children()
+    self:update()
 end
 function Slice:expand_children()
     for i,v in ipairs(self.children) do
@@ -105,6 +129,7 @@ end
 function Slice:punch_in()
     self.t = 0
     self.startend[1] = self.bounds[1]
+    self:update()
     self:expand_children()
 
     self.clock = clock.run(function()
@@ -127,21 +152,14 @@ function Slice:punch_out()
     end
 end
 
-function Slice:update_voice(...)
-    --re-clamp start/end
-    self.startend[1] = util.clamp(self.startend[1], self.bounds[1], self.bounds[2])
-    self.startend[2] = util.clamp(self.startend[2], self.startend[1], self.bounds[2])
-
-    local b = self.buffer
-    for i,v in ipairs {...} do
-        softcut.loop_start(v, self.startend[1])
-        softcut.loop_end(v, self.startend[2])
-        softcut.buffer(v, b[(i - 1)%(#b) + 1])
+function Slice:position(t, units)
+    t = self.bounds[1] + ((units == "fraction") and self:f_to_s(t) or t)
+    for i,v in ipairs(self.voices) do
+        softcut.position(v, t)
     end
 end
-function Slice:position(voice, t, units)
-    t = self.bounds[1] + ((units == "fraction") and self:f_to_s(t) or t)
-    softcut.position(voice, t)
+function Slice:trigger()
+    self:position(0)
 end
 function Slice:clear()
     if #self.buffer == 1 then
@@ -275,6 +293,7 @@ function warden.assign(input, ...)
                     print('warden.assign: cannot assign a voice index greater than ' .. voice_count)
                 end
             end
+            sl:update()
         else
             for i,ssl in ipairs(sl) do
                 asgn(ssl, { vcs[i] or (vcs[#vcs] + i - 1) })
