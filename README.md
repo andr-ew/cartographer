@@ -46,23 +46,23 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 --setup buffer regions
 
 --available recording areas, divided evenly across softcut buffer 1
-blank_area = warden.divide(warden.buffer[1], 2)
+blank_areas = warden.divide(warden.buffer[1], 2)
 
 --the actual areas of recorded material, clamped to each  available blank area
-rec_area = warden.subloop(blank_area)
+rec_areas = warden.subloop(blank_area)
 
 --the areas of playback, clamped to each area of recorded material
-play_area = warden.subloop(rec_area)
+play_areas = warden.subloop(rec_area)
 
 --assign softcut voices to playback slices
 warden.assign(play_area[1], 1)
 warden.assign(play_area[2], 2)
 
 for i = 1, 2 do
-    rec_area:set_start(i, 0)
-    rec_area:set_end(i, 1)
+    rec_areas:set_start(i, 0)
+    rec_areas:set_end(i, 1)
 
-    play_area:set_start(i, 0.3, 'fraction')
-    play_area:set_length(i, 0.2, 'fraction')
+    play_areas:set_start(i, 0.3, 'fraction')
+    play_areas:set_length(i, 0.2, 'fraction')
 end
 ```
