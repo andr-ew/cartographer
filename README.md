@@ -11,7 +11,7 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 ### constructors:
 - `warden.divide(input, n)`: divide the input slice(s) into `n` evenly sized subslices. returns a `bundle` of slices.
 - `warden.subloop(input, n)`: create `n` subslices clamped to the input `slice` or `bundle`. returns a `bundle` or a single `slice`.
-- `warden.folder(input, [folder, ], max_length)`: load the folder(s) of samples into the input `slice` or `bundle` and divide accordingly
+- `warden.folder(input, [folder, ], max_length)`: load the folder(s) of samples into the input `slice` or `bundle` and divide based on sample length
 
 ### voice assignment
 - `warden.assign(input, [voice, ])`: assign the input `slice` or `bundle` to the softcut voice(s). two voices may be assigned to one stereo `slice` for stereo use.
