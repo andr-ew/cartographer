@@ -1,20 +1,20 @@
-# warden
+# cartographer
 
 divide softcut buffer space into arbitrarily nested recording and/or playback slices.
 
 # usage
 
 ### buffers:
-- `warden.buffer`: a `bundle` of two mono slices for each softcut buffer.
-- `warden.buffer_stereo`: the buffers as one stereo slice.
+- `cartographer.buffer`: a `bundle` of two mono slices for each softcut buffer.
+- `cartographer.buffer_stereo`: the buffers as one stereo slice.
 
 ### constructors:
-- `warden.divide(input, n)`: divide the input slice(s) into `n` evenly sized subslices. returns a `bundle` of slices.
-- `warden.subloop(input, n)`: create `n` subslices clamped to the input `slice` or `bundle`. returns a `bundle` or a single `slice`.
-- `warden.folder(input, [path, ], max_length)`: load the folder(s) of samples into the input `slice` or `bundle` and divide based on sample length
+- `cartographer.divide(input, n)`: divide the input slice(s) into `n` evenly sized subslices. returns a `bundle` of slices.
+- `cartographer.subloop(input, n)`: create `n` subslices clamped to the input `slice` or `bundle`. returns a `bundle` or a single `slice`.
+- `cartographer.folder(input, [path, ], max_length)`: load the folder(s) of samples into the input `slice` or `bundle` and divide based on sample length
 
 ### voice assignment
-- `warden.assign(input, [voice, ])`: assign the input `slice` or `bundle` to the softcut voice(s). two voices may be assigned to one stereo `slice` for stereo use.
+- `cartographer.assign(input, [voice, ])`: assign the input `slice` or `bundle` to the softcut voice(s). two voices may be assigned to one stereo `slice` for stereo use.
 
 ### setters & getters:
 - `bundle:set_start(voice, t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
@@ -39,25 +39,25 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 
 ### state
 
-- `warden.save([input, ], file number, file name)`: save bundle(s) to disk
-- `warden.load([input, ], file number, file name)`: load save file to bundle(s)
+- `cartographer.save([input, ], file number, file name)`: save bundle(s) to disk
+- `cartographer.load([input, ], file number, file name)`: load save file to bundle(s)
 
 # example
 ```
 --setup buffer regions
 
 --available recording areas, divided evenly across softcut buffer 1
-blank_areas = warden.divide(warden.buffer[1], 2)
+blank_areas = cartographer.divide(cartographer.buffer[1], 2)
 
 --the actual areas of recorded material, clamped to each  available blank area
-rec_areas = warden.subloop(blank_area)
+rec_areas = cartographer.subloop(blank_area)
 
 --the areas of playback, clamped to each area of recorded material
-play_areas = warden.subloop(rec_area)
+play_areas = cartographer.subloop(rec_area)
 
 --assign softcut voices to playback slices
-warden.assign(play_area[1], 1)
-warden.assign(play_area[2], 2)
+cartographer.assign(play_area[1], 1)
+cartographer.assign(play_area[2], 2)
 
 for i = 1, 2 do
     rec_areas:set_start(i, 0)

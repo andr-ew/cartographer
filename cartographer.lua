@@ -1,12 +1,12 @@
-local warden = {}
-warden.help = [[ ]]
+local cartographer = {}
+cartographer.help = [[ ]]
 
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
 local voice_count = 6
 
 local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 
---create a new slice from an old slice (the warden object handles this)
+--create a new slice from an old slice (the cartographer object handles this)
 function Slice:new(o)
     o = o or {}
     o.children = {}
@@ -258,7 +258,7 @@ function Bundle:new(o)
     return o
 end
 
-warden.buffer = {
+cartographer.buffer = {
     Slice:new {
         startend = { 0, buf_time },
         buffer = { 1 }
@@ -268,15 +268,15 @@ warden.buffer = {
         buffer = { 2 }
     }
 }
-warden.buffer_stereo = Slice:new {
+cartographer.buffer_stereo = Slice:new {
     startend = { 0, buf_time },
     buffer = { 1, 2 }
 }
 
-warden.assignments = {}
+cartographer.assignments = {}
 
 -- assign input to voice indicies
-function warden.assign(input, ...)
+function cartographer.assign(input, ...)
     local voices = { ... }
     if #voices == 0 then voices[1] = 1 end
 
@@ -284,14 +284,14 @@ function warden.assign(input, ...)
         if sl.is_slice == true then
             for _,n in ipairs(vcs) do
                 if n <= voice_count then
-                    if warden.assignments[n] then
-                        warden.assinments[n].voices = {}
+                    if cartographer.assignments[n] then
+                        cartographer.assinments[n].voices = {}
                     end
                     
-                    warden.assignments[n] = sl
+                    cartographer.assignments[n] = sl
                     table.insert(sl.voices, n)
                 else
-                    print('warden.assign: cannot assign a voice index greater than ' .. voice_count)
+                    print('cartographer.assign: cannot assign a voice index greater than ' .. voice_count)
                 end
             end
             sl:update()
@@ -306,26 +306,26 @@ function warden.assign(input, ...)
 end
 
 -- create n slices bound by the input
-function warden.subloop(input, n)
+function cartographer.subloop(input, n)
     n = n or 1
 
     if input.is_slice == true and n == 1 then
         return input:new()
     elseif input.is_slice == true then
         local slices = Bundle:new()
-        for i = 1, n do slices[i] = warden.subloop(input, 1) end
+        for i = 1, n do slices[i] = cartographer.subloop(input, 1) end
         return slices
     else
         local slices = Bundle:new()
         for k,v in pairs(input) do 
-            slices[k] = warden.subloop(v, n) 
+            slices[k] = cartographer.subloop(v, n) 
         end
         return slices
     end
 end
 
 -- divide input into n slices of equal length
-function warden.divide(input, n)
+function cartographer.divide(input, n)
     local slices = Bundle:new()
     local divisions = {}
 
@@ -334,7 +334,7 @@ function warden.divide(input, n)
             table.insert(divisions, { n = this_n, slice = slice })
         else
             if this_n % #slice ~= 0 then 
-                return 'warden.divide: n must be evenly divisible by the number of input slices!'
+                return 'cartographer.divide: n must be evenly divisible by the number of input slices!'
             end
             for k,v in pairs(slice) do
                 add_divisions(v, this_n / #slice)
@@ -372,16 +372,16 @@ local function split_arg(...)
 end
 
 --save inputs to disk, args: [input, ], file number, file name
-function warden.save(...)
+function cartographer.save(...)
     local t, n, name = split_arg(...)
-    local filename = norns.state.data .. (name or 'warden') .. (n or 0) .. ".data"
+    local filename = norns.state.data .. (name or 'cartographer') .. (n or 0) .. ".data"
     tab.save(t, filename)
 end
 
 --load save file to inputs, args: [input, ], file number, file name 
-function warden.load(...)
+function cartographer.load(...)
     local t, n, name = split_arg(...)
-    local filename = norns.state.data .. (name or 'warden') .. (n or 0) .. ".data"
+    local filename = norns.state.data .. (name or 'cartographer') .. (n or 0) .. ".data"
     local data = tab.load(filename)
     
     local function set(t, data)
@@ -395,4 +395,4 @@ function warden.load(...)
     set(t, data)
 end
 
-return warden
+return cartographer
