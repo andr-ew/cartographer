@@ -39,8 +39,8 @@ divide softcut buffer space into arbitrarily nested recording and/or playback sl
 
 ### state
 
-- `warden.save([input, ], file number, file name)`: save slice tables to disk
-- `warden.load([input, ], file number, file name)`: load save file to slice tables
+- `warden.save([input, ], file number, file name)`: save bundle(s) to disk
+- `warden.load([input, ], file number, file name)`: load save file to bundle(s)
 
 # example
 ```
