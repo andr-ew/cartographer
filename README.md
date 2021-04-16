@@ -8,7 +8,7 @@ working with two buffer spaces in vanilla softcut is straighforward, but working
 
 ### solution:
 
-cartographer - a data structure utility for creating virtual buffer space objects (`slices`) that can be nested inside of each other. a `slice` may represent the acutal loop points of a softcut voice (when the slice has been assigned to a voice) and/or the boudnry points of another slice's loop points (or boundaries of boundaries). utilities are provided for creating groups of slices (`bundles`), assigning slices to softcut voices, manipulating slice points (in seconds or relative values), and convenience wrappers for working with the softcut buffers. 
+cartographer - a data structure utility for creating virtual buffer space objects (`slices`) that can be nested inside of each other. a `slice` may represent the acutal loop points of a softcut voice (when the slice has been assigned to a voice) and/or the boundry points of another slice's loop points (or boundaries of boundaries). utilities are provided for creating groups of slices (`bundles`), assigning slices to softcut voices, manipulating slice points (in seconds or relative values), and convenience wrappers for working with the softcut buffers. 
 
 # usage
 
