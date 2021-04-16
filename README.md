@@ -2,11 +2,11 @@
 
 divide softcut buffer space into arbitrarily nested recording and/or playback slices.
 
-**problem:** 
+### problem:
 
 working with two buffer spaces in vanilla softcut is straighforward, but working with more independent spaces involves designing specialized data structures and specialized functions to re-scale that data & modify loop points without spilling into the next adjacent buffer space or unused silence. it all gets far messier once you decide to add a feature to reassign voices to different virtual buffers.
 
-**solution:** 
+### solution:
 
 a data structure utility for creating virtual buffer space objects (`slices`) that can be nested inside of each other. a `slice` may represent the acutal loop points of a softcut voice (when the slice has been assigned to a voice) and/or the boudnry points of another slice's loop points (or boundaries of boundaries). utilities are provided for creating groups of slices (`bundles`), assigning slices to softcut voices, manipulating slice points, and convenience uilities for working with the softcut buffers. 
 
