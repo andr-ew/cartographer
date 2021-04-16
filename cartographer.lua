@@ -285,7 +285,9 @@ function cartographer.assign(input, ...)
             for _,n in ipairs(vcs) do
                 if n <= voice_count then
                     if cartographer.assignments[n] then
-                        cartographer.assinments[n].voices = {}
+                        local t = cartographer.assignments[n].voices
+                        local i = tab.key(t, n)
+                        if i then table.remove(t, i) end
                     end
                     
                     cartographer.assignments[n] = sl
@@ -295,6 +297,7 @@ function cartographer.assign(input, ...)
                 end
             end
             sl:update()
+            sl:trigger()
         else
             for i,ssl in ipairs(sl) do
                 asgn(ssl, { vcs[i] or (vcs[#vcs] + i - 1) })
