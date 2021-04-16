@@ -21,7 +21,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 - `cartographer.subloop(input, n)`: create `n` subslices clamped to the input `slice` or `bundle`. returns a `bundle` or a single `slice`.
 - `cartographer.folder(input, [path, ], max_length)`: load the folder(s) of samples into the input `slice` or `bundle` and divide based on sample length
 
-### voice assignment
+### voice assignment:
 - `cartographer.assign(input, [voice, ])`: assign the input `slice` or `bundle` to the softcut voice(s). two voices may be assigned to one stereo `slice` for stereo use.
 
 ### setters & getters:
