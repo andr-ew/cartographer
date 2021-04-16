@@ -51,7 +51,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 - `cartographer.save([input, ], file number, file name)`: save bundle(s) to disk
 - `cartographer.load([input, ], file number, file name)`: load save file to bundle(s)
 
-# example
+# simple example
 ```
 --setup buffer regions
 
