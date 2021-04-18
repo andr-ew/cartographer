@@ -158,6 +158,7 @@ function Slice:position(t, units)
     for i,v in ipairs(self.voices) do
         softcut.position(v, t)
     end
+    for i,v in ipairs(self.children) do v:position(t, units) end -- convert to local scale ?
 end
 function Slice:trigger()
     self:position(0)
@@ -221,7 +222,6 @@ function Bundle:new(o)
             if Bundle[k] ~= nil then return Bundle[k]
             else return function(s, n, ...)
                 local sl = s:get_slice(n)
-                --return sl[k](sl, ...)
                 if sl then return sl[k](sl, ...) 
                 else print('Bundle.' .. k .. ': no voice assignment at index ' .. n) end
             end end
@@ -231,37 +231,38 @@ function Bundle:new(o)
     return o
 end
 
+--recursive search bundle for slice assigned to voice n or closest ancestor
 function Bundle:get_slice(n)
-    --search slices for assignment
-    for i,slice in pairs(self) do
-        if slice.is_slice == true then ---------------------recursion needed
-            for j,vc in ipairs(slice.voices) do
-                if vc == n then
-                    return slice
-                end
-            end
-        else
-        end
-    end
+    local ret
 
-    local function search_children(sl)
-        for i,slice in ipairs(sl.children) do
-            for j,vc in ipairs(slice.voices) do
-                if vc == n then return true end
-            end
-            return search_children(slice)
+    --recursion mania !
+    local function bundle_do(input, f)
+        if input.is_slice == true then 
+            local r = f(input)
+            if r then return r end
+        else for i,v in pairs(input) do
+            local r = bundle_do(v, f)
+            if r then return r end
+        end end
+    end
+    local function search_voices(slice)
+        for j,vc in ipairs(slice.voices) do
+            if vc == n then return slice end
         end
     end
+    local function search_children(slice)
+        for i,sl in ipairs(slice.children) do
+            if search_voices(sl) or search_children(sl) then return slice end
+        end
+    end
+    
+    --search slices for assignment
+    ret = bundle_do(self, search_voices)
+    if ret then return ret end
 
     --check for the assignment in slice ancestors
-    for i,slice in pairs(self) do
-        if slice.is_slice == true then
-            if search_children(slice) then
-                return slice
-            end
-        else
-        end
-    end
+    ret = bundle_do(self, search_children)
+    if ret then return ret end
 end
 
 cartographer.buffer = {
