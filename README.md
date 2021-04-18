@@ -45,6 +45,8 @@ cartographer - a data structure utility for creating virtual buffer space object
 - `bundle:read(voice, file, start_src, ch_src)`
 - `bundle:write(voice, file)`
 - `bundle:render(voice, samples)`
+- `bundle:punch_in(voice)`
+- `bundle:punch_out(voice)`
 
 ### state
 
