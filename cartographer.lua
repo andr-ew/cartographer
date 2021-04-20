@@ -4,7 +4,7 @@ cartographer.help = [[ ]]
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
 local voice_count = 6
 
-local Slice = { is_slice = true, children = {}, quantum = 0.01 }
+Slice = { is_slice = true, children = {}, quantum = 0.01 }
 
 --create a new slice from an old slice (the cartographer object handles this)
 function Slice:new(o)
