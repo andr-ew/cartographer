@@ -4,7 +4,7 @@ cartographer.help = [[ ]]
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
 local voice_count = 6
 
-Slice = { is_slice = true, children = {}, quantum = 0.01 }
+local Slice = { is_slice = true, children = {}, quantum = 0.01 }
 
 --create a new slice from an old slice (the cartographer object handles this)
 function Slice:new(o)
@@ -212,7 +212,7 @@ function Slice:render(samples)
     softcut.render_buffer(self.buffer[1], self.startend[1], self:get_length(), samples)
 end
 
-Bundle = { is_bundle = true }
+local Bundle = { is_bundle = true }
 
 function Bundle:new(o)
     o = o or {}
@@ -405,4 +405,4 @@ function cartographer.load(...)
     set(t, data)
 end
 
-return cartographer
+return cartographer, Slice, Bundle
