@@ -128,9 +128,9 @@ local function quant(self)
 end
 function Slice:punch_in()
     self.t = 0
-    self.startend[1] = self.bounds[1]
+    self:expand()
     self:update()
-    self:expand_children()
+    self:trigger(i)
 
     self.clock = clock.run(function()
         while true do
