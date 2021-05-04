@@ -65,8 +65,8 @@ function Slice:update()
 
     local b = self.buffer
     for i,v in ipairs(self.voices) do
-        softcut.loop_start(v, self.startend[1])
-        softcut.loop_end(v, self.startend[2])
+        softcut.loop_start(v, util.clamp(self.startend[1], 0, buf_time))
+        softcut.loop_end(v, util.clamp(self.startend[2], 0, buf_time))
         softcut.buffer(v, b[(i - 1)%(#b) + 1])
     end
 
@@ -129,8 +129,7 @@ end
 function Slice:punch_in()
     self.t = 0
     self:expand()
-    self:update()
-    self:trigger(i)
+    --self:trigger(i)
 
     self.clock = clock.run(function()
         while true do
@@ -154,9 +153,9 @@ function Slice:punch_out()
 end
 
 function Slice:position(t, units)
-    t = self.startend[1] + ((units == "fraction") and self:f_to_s(t) or t)
+    local p = self.startend[1] + ((units == "fraction") and self:f_to_s(t) or t)
     for i,v in ipairs(self.voices) do
-        softcut.position(v, t)
+        softcut.position(v, p)
     end
     for i,v in ipairs(self.children) do v:position(t, units) end -- convert to local scale ?
 end
