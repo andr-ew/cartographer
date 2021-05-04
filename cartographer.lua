@@ -154,7 +154,7 @@ function Slice:punch_out()
 end
 
 function Slice:position(t, units)
-    t = self.bounds[1] + ((units == "fraction") and self:f_to_s(t) or t)
+    t = self.startend[1] + ((units == "fraction") and self:f_to_s(t) or t)
     for i,v in ipairs(self.voices) do
         softcut.position(v, t)
     end
