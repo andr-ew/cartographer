@@ -78,3 +78,7 @@ for i = 1, 2 do
     play_areas:set_length(i, 0.2, 'fraction')
 end
 ```
+
+# functional examples
+
+[six loop pedals](https://github.com/andr-ew/cartographer_demo)
