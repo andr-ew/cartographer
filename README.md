@@ -39,7 +39,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 ### methods:
 - `bundle:phase_relative(voice, phase, <'seconds' or 'fraction'>)`: scale phase from `phase_event`
 - `bundle:position(voice, value, units)`: set position relative to slice
-- `bundle:trigger(voice, value, units)`: set position to the start of the slice (0)
+- `bundle:trigger(voice)`: set position to the start of the slice (0)
 - `bundle:clear(voice)`
 - `bundle:copy(voice, source_slice, fade_time, reverse)`
 - `bundle:read(voice, file, start_src, ch_src)`
