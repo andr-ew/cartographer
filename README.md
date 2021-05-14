@@ -61,7 +61,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 blank_areas = cartographer.divide(cartographer.buffer[1], 2)
 
 --the actual areas of recorded material, clamped to each  available blank area
-rec_areas = cartographer.subloop(blank_area)
+rec_areas = cartographer.subloop(blank_areas)
 
 --the areas of playback, clamped to each area of recorded material
 play_areas = cartographer.subloop(rec_area)
