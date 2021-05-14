@@ -64,11 +64,11 @@ blank_areas = cartographer.divide(cartographer.buffer[1], 2)
 rec_areas = cartographer.subloop(blank_areas)
 
 --the areas of playback, clamped to each area of recorded material
-play_areas = cartographer.subloop(rec_area)
+play_areas = cartographer.subloop(rec_areas)
 
 --assign softcut voices to playback slices
-cartographer.assign(play_area[1], 1)
-cartographer.assign(play_area[2], 2)
+cartographer.assign(play_areas[1], 1)
+cartographer.assign(play_areas[2], 2)
 
 for i = 1, 2 do
     rec_areas:set_start(i, 0)
