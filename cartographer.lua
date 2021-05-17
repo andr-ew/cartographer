@@ -4,7 +4,7 @@ cartographer.help = [[ ]]
 local buf_time = 16777216 / 48000 --exact time from the sofctcut source
 local voice_count = 6
 
-local Slice = { is_slice = true, children = {}, quantum = 0.01 }
+local Slice = { is_slice = true, children = {} }
 
 --create a new slice from an old slice (the cartographer object handles this)
 function Slice:new(o)
@@ -131,9 +131,10 @@ function Slice:expand_children(silent)
     end
 end
 local headroom = 0
-local function quant(self)
-    if type(self.quantum) == 'function' then return self.quantum()
-    else return self.quantum or 0.01 end
+local function rate(self)
+    if type(self.rate_callback) == 'function' then 
+        return math.abs(self.rate_callback())
+    else return 1 end
 end
 function Slice:punch_in()
     self.t = 0
@@ -142,11 +143,10 @@ function Slice:punch_in()
 
     self.clock = clock.run(function()
         while true do
-            local q = math.abs(quant(self)) --in the future, use a getter for sofcut.rate
-            clock.sleep(q)
-            self.t = self.t + q
+            clock.sleep(0.01)
+            self.t = self.t + (0.01*rate(self))
             --self:set_end(self.t + headroom*q)
-            self.startend[2] = self.bounds[1] + self.t + headroom*q
+            self.startend[2] = self.bounds[1] + self.t + headroom*0.01*rate(self)
             self:expand_children(true)
         end
     end)
