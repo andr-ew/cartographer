@@ -39,7 +39,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 ### methods:
 - `bundle:phase_relative(voice, phase, <'seconds' or 'fraction'>)`: scale phase from `phase_event`
 - `bundle:position(voice, value, units)`: set position relative to slice
-- `bundle:trigger(voice, value, units)`: set position to the start of the slice (0)
+- `bundle:trigger(voice)`: set position to the start of the slice (0)
 - `bundle:clear(voice)`
 - `bundle:copy(voice, source_slice, fade_time, reverse)`
 - `bundle:read(voice, file, start_src, ch_src)`
@@ -61,14 +61,14 @@ cartographer - a data structure utility for creating virtual buffer space object
 blank_areas = cartographer.divide(cartographer.buffer[1], 2)
 
 --the actual areas of recorded material, clamped to each  available blank area
-rec_areas = cartographer.subloop(blank_area)
+rec_areas = cartographer.subloop(blank_areas)
 
 --the areas of playback, clamped to each area of recorded material
-play_areas = cartographer.subloop(rec_area)
+play_areas = cartographer.subloop(rec_areas)
 
 --assign softcut voices to playback slices
-cartographer.assign(play_area[1], 1)
-cartographer.assign(play_area[2], 2)
+cartographer.assign(play_areas[1], 1)
+cartographer.assign(play_areas[2], 2)
 
 for i = 1, 2 do
     rec_areas:set_start(i, 0)
@@ -78,3 +78,7 @@ for i = 1, 2 do
     play_areas:set_length(i, 0.2, 'fraction')
 end
 ```
+
+# functional examples
+
+[six loop pedals](https://github.com/andr-ew/cartographer_demo)
