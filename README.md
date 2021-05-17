@@ -34,6 +34,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 - `bundle:delta_start(voice, t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
 - `bundle:delta_end(voice, t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
 - `bundle:delta_length(voice, t, <'seconds' or 'fraction'>)`
+- `bundle:delta_startend(voice, t, <'seconds' or 'fraction'>)`: adjusts both start & end with better clamping
 - `bundle:get_slice(voice)`: get the slice object stored in the bundle
 
 ### methods:
