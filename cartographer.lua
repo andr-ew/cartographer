@@ -108,6 +108,15 @@ end
 function Slice:delta_length(delta, units)
     self:set_length(self:get_length(units) + delta, units)
 end
+function Slice:delta_startend(delta, units)
+    local t = (units == "fraction") and self:f_to_s(delta) or delta
+    if self.startend[2] + t < self.bounds[2] 
+        and self.startend[1] + t > self.bounds[1] 
+    then
+        for i = 1,2 do self.startend[i] = self.startend[i] + t end
+        self:update()
+    end
+end
 
 function Slice:expand(silent)
     --self.startend = { self.bounds[1], self.bounds[2] }
