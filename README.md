@@ -86,7 +86,7 @@ end
 
 # including
 
-download this repo to the `lib/` folder or include it as a [submodule](https://github.blog/2016-02-01-working-with-submodules/). then, at the beginning of your script add:
+download this repo to your `lib/` folder or include it as a [submodule](https://github.blog/2016-02-01-working-with-submodules/). then, at the beginning of your script add:
 ```
 cartographer = include 'lib/cartographer/cartographer'
 ```
