@@ -80,7 +80,7 @@ for i = 1, 2 do
 end
 ```
 
-# functional examples
+# demo
 
 [six loop pedals](https://github.com/andr-ew/cartographer_demo)
 
