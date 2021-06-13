@@ -139,7 +139,7 @@ end
 function Slice:punch_in()
     self.t = 0
     self:expand()
-    --self:trigger(i)
+    self:trigger()
 
     self.clock = clock.run(function()
         while true do
