@@ -34,6 +34,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 - `bundle:delta_start(voice, t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
 - `bundle:delta_end(voice, t, <'seconds' or 'fraction'>, <'relative' or 'absolute'>)` 
 - `bundle:delta_length(voice, t, <'seconds' or 'fraction'>)`
+- `bundle:delta_startend(voice, t, <'seconds' or 'fraction'>)`: adjusts both start & end with better clamping
 - `bundle:get_slice(voice)`: get the slice object stored in the bundle
 
 ### methods:
@@ -79,6 +80,13 @@ for i = 1, 2 do
 end
 ```
 
-# functional examples
+# demo
 
 [six loop pedals](https://github.com/andr-ew/cartographer_demo)
+
+# including
+
+download this repo to your `lib/` folder or include it as a [submodule](https://github.blog/2016-02-01-working-with-submodules/). then, at the beginning of your script add:
+```
+cartographer = include 'lib/cartographer/cartographer'
+```
