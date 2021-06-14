@@ -82,8 +82,11 @@ end
 
 # demo
 
-[six loop pedals](https://github.com/andr-ew/cartographer_demo)
-[wrms](https://github.com/andr-ew/wrms)
+- [six loop pedals](https://github.com/andr-ew/cartographer_demo)
+
+# examples
+
+- [wrms](https://github.com/andr-ew/wrms)
 
 # including
 
