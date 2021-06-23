@@ -2,6 +2,10 @@
 
 divide softcut buffer space into arbitrarily nested recording and/or playback slices.
 
+### tl;dr
+
+if you've ever thought "I wish softcut had more than two buffers" this might be for you
+
 ### problem:
 
 working with two buffer spaces in vanilla softcut is straighforward, but working with more independent "virtual" buffer spaces involves designing specialized data structures and specialized functions to re-scale that data & modify loop points without spilling into the next adjacent buffer space or unused silence. it all gets far messier once you decide to add a feature to reassign voices to different virtual buffers.
