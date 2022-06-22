@@ -130,7 +130,7 @@ function Slice:expand_children(silent)
         v:expand(silent)
     end
 end
-local headroom = 0
+local headroom = 0.5
 local function rate(self)
     if type(self.rate_callback) == 'function' then 
         return math.abs(self.rate_callback())
@@ -146,7 +146,7 @@ function Slice:punch_in()
             clock.sleep(0.01)
             self.t = self.t + (0.01*rate(self))
             --self:set_end(self.t + headroom*q)
-            self.startend[2] = self.bounds[1] + self.t + headroom*0.01*rate(self)
+            self.startend[2] = self.bounds[1] + self.t + (headroom * rate(self))
             self:expand_children(true)
         end
     end)
