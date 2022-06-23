@@ -312,7 +312,7 @@ function cartographer.assign(input, ...)
                 end
             end
             sl:update()
-            sl:trigger()
+            --sl:trigger()
         else
             for i,ssl in ipairs(sl) do
                 asgn(ssl, { vcs[i] or (vcs[#vcs] + i - 1) })
