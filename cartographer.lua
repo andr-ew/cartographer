@@ -221,10 +221,10 @@ function Slice:render(samples)
 end
 
 -- return a function that checks the args coming from the softcut.event_render callback & calls func if the start & buffer match.
--- NOTE: beware of rendering multiple slices with the same buffer & start point
+-- NOTE: beware of rendering multiple slices with the same buffer & start poins that are less than 1 second apart (rounding is neccesary)
 function Slice:event_render(func)
     return function(ch, start, i, s)
-        if ch == self.buffer[1] and start == self.startend[1] then
+        if ch == self.buffer[1] and util.round(start) == util.round(self.startend[1]) then
             func(i, s)
         end
     end
