@@ -220,6 +220,16 @@ function Slice:render(samples)
     softcut.render_buffer(self.buffer[1], self.startend[1], self:get_length(), samples)
 end
 
+-- return a function that checks the args coming from the softcut.event_render callback & calls func if the start & buffer match.
+-- NOTE: beware of rendering multiple slices with the same buffer & start point
+function Slice:event_render(func)
+    return function(ch, start, i, s)
+        if ch == self.buffer[1] and start == self.startend[1] then
+            func(i, s)
+        end
+    end
+end
+
 local Bundle = { is_bundle = true }
 
 function Bundle:new(o)
