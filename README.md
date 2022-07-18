@@ -75,12 +75,12 @@ play_areas = cartographer.subloop(rec_areas)
 cartographer.assign(play_areas[1], 1)
 cartographer.assign(play_areas[2], 2)
 
-for i = 1, 2 do
-    rec_areas:set_start(i, 0)
-    rec_areas:set_end(i, 1)
+for voice = 1, 2 do
+    rec_areas:set_start(voice, 0)
+    rec_areas:set_end(voice, 1)
 
-    play_areas:set_start(i, 0.3, 'fraction')
-    play_areas:set_length(i, 0.2, 'fraction')
+    play_areas:set_start(voice, 0.3, 'fraction')
+    play_areas:set_length(voice, 0.2, 'fraction')
 end
 ```
 
