@@ -26,12 +26,17 @@ function Slice:new(o)
     return o
 end
 
+--private
 function Slice:s_to_f(s) return s / self:get_boundary_length() end
 function Slice:f_to_s(f) return f * self:get_boundary_length() end
 function Slice:get_buffer() return table.unpack(self.buffer) end
 function Slice:get_boundary_start() return self.bounds[1] end
 function Slice:get_boundary_end() return self.bounds[2] end
 function Slice:get_boundary_length() return self.bounds[2] - self.bounds[1] end
+--/private
+
+function Slice:seconds_to_fraction(s) return s / self:get_length() end
+function Slice:fraction_to_seconds(f) return f * self:get_length() end
 
 function Slice:get_start(units, abs) 
     if abs == 'absolute' then return self.startend[1] end
