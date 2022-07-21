@@ -198,27 +198,45 @@ function Slice:copy(src, fade_time, reverse)
         )
     end
 end
-function Slice:read(file, start_src, ch_src)
+function Slice:read(file, start_src, ch_src, length, padding)
     local dst = self
     start_src = start_src or 0
     ch_src = ch_src or 1
+    length = length or 'destination'
+    padding = padding or 0.1
+    print('length', length, length == 'source' or length == 'src')
+
+    if length == 'source' or length == 'src' then
+        local ch, samples, rate = audio.file_info(file)
+        if samples then
+            local len = (samples/rate) - padding
+            dst:set_length(len - start_src)
+        else
+            print("cartographer: couldn't load file info for "..file)
+        end
+    end
 
     if #self.buffer == 1 then
         softcut.buffer_read_mono(file, 
-            start_src, dst.startend[1], dst:get_length(), 
+            start_src, dst.startend[1], dst:get_length() + padding, 
             ch_src, dst.buffer[1]
         )
     else
         softcut.buffer_read_stereo(file, 
-            start_src, dst.startend[1], dst:get_length()
+            start_src, dst.startend[1], dst:get_length() + padding
         )
     end
 end
-function Slice:write(file)
+function Slice:write(file, padding)
+    padding = padding or 0.1
     if #self.buffer == 1 then
-        softcut.buffer_write_mono(file, self.startend[1], self:get_length(), self.buffer[1])
+        softcut.buffer_write_mono(
+            file, self.startend[1], self:get_length() + padding, self.buffer[1]
+        )
     else
-        softcut.buffer_write_stereo(file, self.startend[1], self:get_length())
+        softcut.buffer_write_stereo(
+            file, self.startend[1], self:get_length() + padding
+        )
     end
 end
 function Slice:render(samples)
