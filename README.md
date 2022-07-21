@@ -52,7 +52,7 @@ cartographer - a data structure utility for creating virtual buffer space object
 - `bundle:trigger(voice)`: set position to the start of the slice (0)
 - `bundle:clear(voice)`
 - `bundle:copy(voice, source_slice, fade_time, reverse)`
-- `bundle:read(voice, file, start_src, ch_src)`
+- `bundle:read(voice, file, start_src, ch_src, length: <'destination' or 'source'>)`: read a file into the slice. last argument sets whether to keep the current length of the slice (`'destination'`) or to set the slice to the length of the loaded audio (`'source'`) 
 - `bundle:write(voice, file)`
 - `bundle:render(voice, samples)`
 - `bundle:punch_in(voice)`
