@@ -198,6 +198,7 @@ function Slice:copy(src, fade_time, reverse)
         )
     end
 end
+--FIXME: might need to add padding at the beginning also, to account for reverse playback (crossfade at the beginning). this won't be possible if slice boundary starts at 0, so user will have to compensate for that (warden.buffer[1, 2]:set_start(padding))
 function Slice:read(file, start_src, ch_src, length, padding)
     local dst = self
     start_src = start_src or 0
