@@ -355,9 +355,9 @@ function cartographer.assign(input, ...)
     end
 
     asgn(input, voices)
-    for _,n in ipairs(voices) do
-        softcut.position(n, input:get_start(n))
-    end
+    -- for _,n in ipairs(voices) do
+    --     softcut.position(n, input:get_start(n, 'seconds', 'absolute'))
+    -- end
 end
 
 -- create n slices bound by the input
