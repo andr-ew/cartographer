@@ -35,7 +35,10 @@ function Slice:get_boundary_end() return self.bounds[2] end
 function Slice:get_boundary_length() return self.bounds[2] - self.bounds[1] end
 --/private
 
-function Slice:seconds_to_fraction(s) return s / self:get_length() end
+function Slice:seconds_to_fraction(s) 
+    local len = self:get_length()
+    return len > 0 and (s / len) or 0
+end
 function Slice:fraction_to_seconds(f) return f * self:get_length() end
 
 function Slice:get_start(units, abs) 
@@ -59,7 +62,8 @@ function Slice:get_length(units)
 end
 function Slice:phase_relative(phase, units)
     local s = phase - self.startend[1]
-    if units == 'fraction' then return s / self:get_length()
+    local len = self:get_length()
+    if units == 'fraction' then return len > 0 and (s / self:get_length()) or 0
     else return s end
 end
 
