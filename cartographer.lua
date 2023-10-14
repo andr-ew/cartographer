@@ -85,45 +85,45 @@ function Slice:update()
     end
 end
 
-function Slice:set_buffer(b) 
+function Slice:set_buffer(b, silent) 
     self.buffer = (type(b) == 'table') and b or { b } 
-    self:update()
+    if not silent then self:update() end
 end
-function Slice:set_start(t, units, abs)
+function Slice:set_start(t, units, abs, silent)
     if abs == 'absolute' then self.startend[1] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[1] = util.clamp(t + self.bounds[1], self.bounds[1], self.startend[2])
     end
-    self:update()
+    if not silent then self:update() end
 end
-function Slice:set_end(t, units, abs)
+function Slice:set_end(t, units, abs, silent)
     if abs == 'absolute' then self.startend[2] = t else
         t = (units == "fraction") and self:f_to_s(t) or t
         self.startend[2] = util.clamp(t + self.bounds[1], self.startend[1], self.bounds[2])
     end
-    self:update()
+    if not silent then self:update() end
 end
-function Slice:set_length(t, units)
+function Slice:set_length(t, units, silent)
     t = (units == "fraction") and self:f_to_s(t) or t
     self.startend[2] = util.clamp(t + self.startend[1], 0, self.bounds[2])
-    self:update()
+    if not silenth then self:update() end
 end
-function Slice:delta_start(delta, units, abs)
-    self:set_start(self:get_start(units, abs) + delta, units, abs)
+function Slice:delta_start(delta, units, abs, silent)
+    self:set_start(self:get_start(units, abs) + delta, units, abs, silent)
 end
-function Slice:delta_end(delta, units, abs)
-    self:set_end(self:get_end(units, abs) + delta, units, abs)
+function Slice:delta_end(delta, units, abs, silent)
+    self:set_end(self:get_end(units, abs) + delta, units, abs, silent)
 end
-function Slice:delta_length(delta, units)
-    self:set_length(self:get_length(units) + delta, units)
+function Slice:delta_length(delta, units, silent)
+    self:set_length(self:get_length(units) + delta, units, silent)
 end
-function Slice:delta_startend(delta, units)
+function Slice:delta_startend(delta, units, silent)
     local t = (units == "fraction") and self:f_to_s(delta) or delta
     if self.startend[2] + t < self.bounds[2] 
         and self.startend[1] + t > self.bounds[1] 
     then
         for i = 1,2 do self.startend[i] = self.startend[i] + t end
-        self:update()
+        if not silent then self:update() end
     end
 end
 
