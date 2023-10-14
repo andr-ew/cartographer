@@ -209,7 +209,6 @@ function Slice:read(file, start_src, ch_src, length, padding)
     ch_src = ch_src or 1
     length = length or 'destination'
     padding = padding or 0.1
-    print('length', length, length == 'source' or length == 'src')
 
     if length == 'source' or length == 'src' then
         local ch, samples, rate = audio.file_info(file)
