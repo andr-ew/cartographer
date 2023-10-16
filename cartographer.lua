@@ -139,7 +139,7 @@ function Slice:expand_children(silent)
         v:expand(silent)
     end
 end
-local headroom = 0.5
+local headroom = 1
 local function rate(self)
     if type(self.rate_callback) == 'function' then 
         return math.abs(self.rate_callback())
@@ -150,23 +150,27 @@ function Slice:punch_in()
     self:expand()
     self:trigger()
 
-    self.clock = clock.run(function()
-        while true do
-            clock.sleep(0.01)
+    self.metro = metro.init(function()
+        if self.metro then
+            -- clock.sleep(0.01)
             self.t = self.t + (0.01*rate(self))
             --self:set_end(self.t + headroom*q)
             self.startend[2] = self.bounds[1] + self.t + (headroom * rate(self))
             self:expand_children(true)
         end
-    end)
+    end, 0.01)
+
+    self.metro:start()
 end
 function Slice:punch_out()
-    if self.clock then
-        clock.cancel(self.clock)
+    if self.metro then
+        self.metro:stop()
+        self.metro = nil
+        -- clock.cancel(self.clock)
+        
         self:set_end(self.t)
         self:expand_children()
         self.t = 0
-        self.clock = nil
     end
 end
 
