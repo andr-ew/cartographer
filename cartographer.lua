@@ -150,19 +150,21 @@ function Slice:punch_in()
     self:expand()
     self:trigger()
 
-    self.clock = clock.run(function()
-        while true do
-            clock.sleep(0.01)
-            self.t = self.t + (0.01*rate(self))
-            --self:set_end(self.t + headroom*q)
-            self.startend[2] = self.bounds[1] + self.t + (headroom * rate(self))
-            self:expand_children(true)
-        end
-    end)
+    self.metro = metro.init(function()
+        -- clock.sleep(0.01)
+        self.t = self.t + (0.01*rate(self))
+        --self:set_end(self.t + headroom*q)
+        self.startend[2] = self.bounds[1] + self.t + (headroom * rate(self))
+        self:expand_children(true)
+    end, 0.01)
+
+    self.metro:start()
 end
 function Slice:punch_out()
-    if self.clock then
-        clock.cancel(self.clock)
+    if self.metro then
+        self.metro:stop()
+        -- clock.cancel(self.clock)
+        
         self:set_end(self.t)
         self:expand_children()
         self.t = 0
